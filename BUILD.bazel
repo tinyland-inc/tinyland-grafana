@@ -1,0 +1,145 @@
+"""
+BUILD.bazel for @tinyland-inc/tinyland-grafana.
+
+Dual-mode build: works with both pnpm (standalone) and Bazel (CI/production).
+  Standalone: cd packages/tinyland-grafana && pnpm test
+  Monorepo:   bazel build //packages/tinyland-grafana/...
+
+Provides Grafana API client, configuration, and dashboard JSON definitions.
+"""
+
+load("@aspect_rules_js//js:defs.bzl", "js_library", "js_test")
+load("@aspect_rules_js//npm:defs.bzl", "npm_package")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+load("@npm//:defs.bzl", "npm_link_all_packages")
+
+# =============================================================================
+# npm link - makes node_modules available for this package
+# =============================================================================
+
+npm_link_all_packages(name = "node_modules")
+
+# =============================================================================
+# Dashboard JSON data files
+# =============================================================================
+
+filegroup(
+    name = "dashboards",
+    srcs = glob(["src/dashboards/*.json"]),
+    visibility = ["//visibility:public"],
+)
+
+# =============================================================================
+# TypeScript compilation
+# =============================================================================
+
+ts_project(
+    name = "tinyland_grafana",
+    srcs = glob(
+        ["src/**/*.ts"],
+        exclude = [
+            "src/**/*.test.ts",
+            "src/**/*.spec.ts",
+        ],
+    ),
+    data = [":dashboards"],
+    declaration = True,
+    declaration_map = True,
+    source_map = True,
+    tsconfig = ":tsconfig.json",
+    transpiler = "tsc",
+    deps = [
+        ":node_modules",
+        "//:tsconfig_base",
+        ":node_modules/@types/node",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# =============================================================================
+# npm package target
+# =============================================================================
+
+npm_package(
+    name = "pkg",
+    srcs = [
+        "package.json",
+        ":tinyland_grafana",
+        ":dashboards",
+    ],
+    package = "@tinyland-inc/tinyland-grafana",
+    version = "0.1.0",
+    visibility = ["//visibility:public"],
+)
+
+# =============================================================================
+# Test targets
+# =============================================================================
+
+ts_project(
+    name = "tinyland_grafana_test_lib",
+    srcs = glob(["tests/**/*.test.ts"]),
+    declaration = False,
+    source_map = True,
+    tsconfig = ":tsconfig.json",
+    transpiler = "tsc",
+    deps = [
+        ":tinyland_grafana",
+        ":node_modules",
+        ":node_modules/vitest",
+    ],
+)
+
+js_test(
+    name = "test",
+    data = [
+        ":tinyland_grafana",
+        ":tinyland_grafana_test_lib",
+        ":dashboards",
+        ":node_modules",
+        ":node_modules/vitest",
+        "vitest.config.ts",
+    ],
+    entry_point = ":node_modules/vitest/vitest.mjs",
+    args = [
+        "run",
+        "--reporter=verbose",
+        "--config",
+        "$(rootpath vitest.config.ts)",
+    ],
+    log_level = "info",
+    visibility = ["//visibility:public"],
+)
+
+# =============================================================================
+# Typecheck-only target (no emit)
+# =============================================================================
+
+ts_project(
+    name = "typecheck",
+    srcs = glob(["src/**/*.ts"]),
+    data = [":dashboards"],
+    declaration = False,
+    no_emit = True,
+    tsconfig = ":tsconfig.json",
+    transpiler = "tsc",
+    deps = [
+        ":node_modules",
+        "//:tsconfig_base",
+        ":node_modules/@types/node",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# =============================================================================
+# Exported files for downstream consumers
+# =============================================================================
+
+exports_files(
+    [
+        "package.json",
+        "tsconfig.json",
+        "vitest.config.ts",
+    ],
+    visibility = ["//visibility:public"],
+)
