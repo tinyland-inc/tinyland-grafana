@@ -1,5 +1,5 @@
 /**
- * Package-level configuration injection for @tinyland-inc/tinyland-grafana.
+ * Package-level configuration injection for @tummycrypt/tinyland-grafana.
  *
  * Consumers call configureGrafana() at startup to supply environment-specific
  * values (URLs, tokens, timeouts) without coupling to SvelteKit's $env or

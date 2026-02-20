@@ -1,10 +1,10 @@
 /**
- * @tinyland-inc/tinyland-grafana
+ * @tummycrypt/tinyland-grafana
  *
  * Grafana API client, configuration, and dashboard definitions
  * for Tinyland observability.
  *
- * @module @tinyland-inc/tinyland-grafana
+ * @module @tummycrypt/tinyland-grafana
  */
 
 // ---------------------------------------------------------------------------

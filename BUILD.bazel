@@ -1,5 +1,5 @@
 """
-BUILD.bazel for @tinyland-inc/tinyland-grafana.
+BUILD.bazel for @tummycrypt/tinyland-grafana.
 
 Dual-mode build: works with both pnpm (standalone) and Bazel (CI/production).
   Standalone: cd packages/tinyland-grafana && pnpm test
@@ -67,7 +67,7 @@ npm_package(
         ":tinyland_grafana",
         ":dashboards",
     ],
-    package = "@tinyland-inc/tinyland-grafana",
+    package = "@tummycrypt/tinyland-grafana",
     version = "0.1.0",
     visibility = ["//visibility:public"],
 )

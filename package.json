@@ -1,5 +1,5 @@
 {
-  "name": "@tinyland-inc/tinyland-grafana",
+  "name": "@tummycrypt/tinyland-grafana",
   "version": "0.1.0",
   "description": "Grafana API client, configuration, and dashboard definitions for Tinyland observability",
   "type": "module",
@@ -32,7 +32,8 @@
   "author": "Tinyland Inc.",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/tinyland/packages/tinyland-grafana"
+    "url": "https://gitlab.com/tinyland/projects/tinyland.dev.git",
+    "directory": "packages/tinyland-grafana"
   },
   "dependencies": {},
   "devDependencies": {
@@ -40,14 +41,18 @@
     "vitest": "^3.0.0"
   },
   "peerDependencies": {
-    "@tinyland-inc/tinyland-otel": "workspace:*"
+    "@tummycrypt/tinyland-otel": "workspace:*"
   },
   "peerDependenciesMeta": {
-    "@tinyland-inc/tinyland-otel": {
+    "@tummycrypt/tinyland-otel": {
       "optional": true
     }
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   }
 }
