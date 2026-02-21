@@ -1,0 +1,464 @@
+{
+  "uid": "phase2-security-monitoring",
+  "title": "Security Monitoring",
+  "tags": ["security", "traceql", "fingerprint"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": ["10s", "30s", "1m", "5m", "15m", "30m", "1h"]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "type": "table",
+      "title": "High-Risk Sessions (Last 24h)",
+      "description": "Active sessions with high-risk fingerprint scores tracked via TraceQL. Risk factors include suspicious patterns, VPN usage, and behavioral anomalies.",
+      "datasource": {
+        "type": "tempo",
+        "uid": "tempo"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "queryType": "traceql",
+          "query": "{ name=\"fingerprint.risk_scoring\" && span.risk.tier=\"high\" } | select(span.fingerprint.id, span.risk.score, span.risk.factors)",
+          "limit": 100
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "filterable": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.6
+              },
+              {
+                "color": "red",
+                "value": 0.8
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "span.risk.score"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 120
+              },
+              {
+                "id": "displayName",
+                "value": "Risk Score"
+              },
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "span.fingerprint.id"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              },
+              {
+                "id": "displayName",
+                "value": "Fingerprint ID"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Traces",
+                    "url": "/admin/security?fingerprint=${__value.raw}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "span.risk.factors"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Risk Factors"
+              },
+              {
+                "id": "custom.width",
+                "value": 400
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Risk Score",
+            "desc": true
+          }
+        ],
+        "footer": {
+          "show": true,
+          "reducer": ["count"],
+          "fields": ["span.fingerprint.id"]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "type": "timeseries",
+      "title": "Failed Login Attempts",
+      "description": "Failed authentication attempts tracked via TraceQL spans",
+      "datasource": {
+        "type": "tempo",
+        "uid": "tempo"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "queryType": "traceql",
+          "query": "{ name=\"auth.login\" && span.status.code=\"error\" && span.error.type=\"authentication_failed\" } | rate() by (span.fingerprint.id)",
+          "limit": 50
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "showPoints": "auto",
+            "pointSize": 5
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "reqps"
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": ["last", "max", "mean"]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "type": "timeseries",
+      "title": "Session Hijacking Alerts",
+      "description": "Detected session hijacking attempts via fingerprint changes",
+      "datasource": {
+        "type": "tempo",
+        "uid": "tempo"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "queryType": "traceql",
+          "query": "{ name=\"fingerprint.validation\" && span.status.code=\"error\" && span.error.type=\"fingerprint_mismatch\" } | rate()",
+          "limit": 50
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 1,
+            "fillOpacity": 80
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "reqps"
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "single"
+        },
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "type": "table",
+      "title": "Impossible Travel Alerts",
+      "description": "Sessions with geographically impossible travel patterns detected via TraceQL",
+      "datasource": {
+        "type": "tempo",
+        "uid": "tempo"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "queryType": "traceql",
+          "query": "{ name=\"fingerprint.geolocation\" && span.risk.flags=\"impossible_travel\" } | select(span.fingerprint.id, span.geo.from_city, span.geo.to_city, span.geo.distance_km, span.geo.time_delta_minutes)",
+          "limit": 100
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "span.fingerprint.id"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Fingerprint ID"
+              },
+              {
+                "id": "custom.width",
+                "value": 200
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "span.geo.from_city"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "From City"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "span.geo.to_city"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "To City"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "span.geo.distance_km"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Distance (km)"
+              },
+              {
+                "id": "unit",
+                "value": "lengthkm"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 500
+                    },
+                    {
+                      "color": "red",
+                      "value": 1000
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "span.geo.time_delta_minutes"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Time Delta (min)"
+              },
+              {
+                "id": "unit",
+                "value": "m"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Distance (km)",
+            "desc": true
+          }
+        ]
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "risk_tier",
+        "type": "custom",
+        "label": "Risk Tier",
+        "multi": true,
+        "includeAll": true,
+        "options": [
+          {
+            "text": "High",
+            "value": "high",
+            "selected": true
+          },
+          {
+            "text": "Medium",
+            "value": "medium",
+            "selected": false
+          },
+          {
+            "text": "Low",
+            "value": "low",
+            "selected": false
+          }
+        ],
+        "current": {
+          "text": "High",
+          "value": "high"
+        }
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "name": "Security Events",
+        "datasource": {
+          "type": "tempo",
+          "uid": "tempo"
+        },
+        "enable": true,
+        "iconColor": "red",
+        "target": {
+          "queryType": "traceql",
+          "query": "{ name=\"security.alert\" }"
+        }
+      }
+    ]
+  }
+}

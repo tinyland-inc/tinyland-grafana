@@ -1,0 +1,1186 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "WCAG compliance tracking with TraceQL",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": "Tempo",
+      "description": "Accessibility violation counts over time by URL",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Violations",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max", "last"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" } | select(span.a11y.url, span.a11y.violation_count)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "A11y Violations Over Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Tempo",
+      "description": "Critical and serious accessibility violations in the last 24 hours",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "URL"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 400
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical Count"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Serious Count"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1
+                    },
+                    {
+                      "color": "red",
+                      "value": 5
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Critical Count"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" && span.a11y.critical_count > 0 } | select(span.a11y.url, span.a11y.critical_count, span.a11y.serious_count)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Critical Violations (Last 24h)",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "span.a11y.url": "URL",
+              "span.a11y.critical_count": "Critical Count",
+              "span.a11y.serious_count": "Serious Count"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": "Tempo",
+      "description": "Count of accessibility scans where screen readers were detected",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 10
+              },
+              {
+                "color": "dark-green",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["count"],
+          "fields": ""
+        },
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" && span.a11y.screen_reader_detected=true } | select(span.a11y.url)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Screen Reader Detected",
+      "type": "stat"
+    },
+    {
+      "datasource": "Tempo",
+      "description": "Percentage of users with reduced motion accessibility preference enabled",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 5
+              },
+              {
+                "color": "dark-green",
+                "value": 15
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" && span.a11y.reduced_motion=true }",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Users with Reduced Motion Preference",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "reduceRow",
+            "reduce": {
+              "reducer": "count"
+            },
+            "replaceFields": false
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": "Tempo",
+      "description": "Total accessibility scans performed over time",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 100
+              },
+              {
+                "color": "dark-blue",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 8
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["count"],
+          "fields": ""
+        },
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" }",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Total A11y Scans",
+      "type": "stat"
+    },
+    {
+      "datasource": "Tempo",
+      "description": "Count of scans with high contrast mode enabled",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 8
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["count"],
+          "fields": ""
+        },
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" && span.a11y.high_contrast=true }",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "High Contrast Users",
+      "type": "stat"
+    },
+    {
+      "datasource": "Tempo",
+      "description": "Breakdown of violation counts by severity level (critical, serious, moderate)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Serious"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max", "sum"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" } | select(span.a11y.critical_count)",
+          "queryType": "traceql",
+          "refId": "A",
+          "legendFormat": "Critical"
+        },
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" } | select(span.a11y.serious_count)",
+          "queryType": "traceql",
+          "refId": "B",
+          "legendFormat": "Serious"
+        }
+      ],
+      "title": "Violations by Severity Level",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Tempo",
+      "description": "Pages with the highest number of accessibility violations",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "id": 8,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "hidden",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" } | select(span.a11y.url, span.a11y.violation_count)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Top Pages by Violation Count",
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "span.a11y.url": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "span.a11y.violation_count": {
+                "aggregations": ["mean"],
+                "operation": "aggregate"
+              }
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "desc": true,
+                "field": "span.a11y.violation_count (mean)"
+              }
+            ]
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 10
+          }
+        }
+      ],
+      "type": "barchart"
+    },
+    {
+      "datasource": "Tempo",
+      "description": "Pages tested with accessibility scans in admin routes",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "URL"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 350
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Scan Count"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg Violations"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 3
+                    },
+                    {
+                      "color": "red",
+                      "value": 10
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 9,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Avg Violations"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" && span.a11y.url=~\".*admin.*\" } | select(span.a11y.url, span.a11y.violation_count, span.a11y.critical_count)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Admin Routes A11y Scans",
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "span.a11y.url": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "span.a11y.violation_count": {
+                "aggregations": ["mean"],
+                "operation": "aggregate"
+              },
+              "span.a11y.critical_count": {
+                "aggregations": ["sum"],
+                "operation": "aggregate"
+              }
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "span.a11y.url": "URL",
+              "span.a11y.violation_count (mean)": "Avg Violations",
+              "span.a11y.critical_count (sum)": "Total Critical"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": "Tempo",
+      "description": "Failed accessibility scan ingestions",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 30
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["count"],
+          "fields": ""
+        },
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" && span.a11y.ingestion_success=false }",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Failed A11y Ingestions",
+      "type": "stat"
+    },
+    {
+      "datasource": "Tempo",
+      "description": "Users with forced colors accessibility feature",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 30
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["count"],
+          "fields": ""
+        },
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" && span.a11y.forced_colors=true }",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Forced Colors Users",
+      "type": "stat"
+    },
+    {
+      "datasource": "Tempo",
+      "description": "Tests that passed accessibility checks",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 30
+      },
+      "id": 12,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["mean"],
+          "fields": ""
+        },
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" } | select(span.a11y.pass_count)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Pass Count per Scan",
+      "type": "stat"
+    },
+    {
+      "datasource": "Tempo",
+      "description": "Incomplete accessibility tests requiring manual review",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 30
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["mean"],
+          "fields": ""
+        },
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "editorMode": "code",
+          "query": "{ name=\"a11y.scan\" } | select(span.a11y.incomplete_count)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Incomplete Tests per Scan",
+      "type": "stat"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["traceql", "a11y", "accessibility", "wcag"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Accessibility Monitoring",
+  "uid": "phase2-a11y-monitoring",
+  "version": 0,
+  "weekStart": ""
+}
