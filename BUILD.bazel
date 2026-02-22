@@ -8,7 +8,6 @@ Dual-mode build: works with both pnpm (standalone) and Bazel (CI/production).
 Provides Grafana API client, configuration, and dashboard JSON definitions.
 """
 
-load("@aspect_rules_js//js:defs.bzl", "js_library", "js_test")
 load("@aspect_rules_js//npm:defs.bzl", "npm_package")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@npm//:defs.bzl", "npm_link_all_packages")
@@ -50,6 +49,9 @@ ts_project(
     source_map = True,
     tsconfig = ":tsconfig.json",
     transpiler = "tsc",
+    out_dir = "dist",
+    root_dir = "src",
+    validate = False,
     deps = [
         ":node_modules",
         "//packages:tsconfig_base",
@@ -78,30 +80,17 @@ npm_package(
 # Test targets
 # =============================================================================
 
-ts_project(
-    name = "tinyland_grafana_test_lib",
-    srcs = glob(["tests/**/*.test.ts"]),
-    declaration = False,
-    source_map = True,
-    tsconfig = ":tsconfig.json",
-    transpiler = "tsc",
-    deps = [
-        ":tinyland_grafana",
-        ":node_modules",
-        ":node_modules/vitest",
-    ],
-)
-
 vitest_bin.vitest_test(
     name = "test",
     data = [
-        ":tinyland_grafana",
-        ":tinyland_grafana_test_lib",
-        ":dashboards",
+        
+                ":dashboards",
         ":node_modules",
+        "tsconfig.json",
+        "//packages:tsconfig.base.json",
         ":node_modules/vitest",
         "vitest.config.ts",
-    ],
+    ] + glob(["src/**/*.ts"]) + glob(["tests/**/*.test.ts", "tests/**/*.ts"]),
     args = [
         "run",
         "--reporter=verbose",
@@ -124,6 +113,7 @@ ts_project(
     no_emit = True,
     tsconfig = ":tsconfig.json",
     transpiler = "tsc",
+    validate = False,
     deps = [
         ":node_modules",
         "//packages:tsconfig_base",
