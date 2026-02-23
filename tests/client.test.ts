@@ -1,11 +1,11 @@
-/**
- * Tests for the Grafana HTTP client module.
- *
- * These tests mock `fetch` and verify retry logic, rate limiting, time-range
- * parsing, and the public API surface of GrafanaClient.
- *
- * @module tests/client
- */
+
+
+
+
+
+
+
+
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
@@ -22,9 +22,9 @@ import {
   extractRawData,
 } from '../src/client.js';
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+
+
+
 
 function setupBasicConfig() {
   resetGrafanaConfig();
@@ -37,12 +37,12 @@ function setupBasicConfig() {
   });
 }
 
-// ---------------------------------------------------------------------------
-// parseTimeRange
-// ---------------------------------------------------------------------------
+
+
+
 
 describe('parseTimeRange', () => {
-  const now = 1700000000000; // Fixed timestamp
+  const now = 1700000000000; 
 
   it('should parse "now" as the current timestamp', () => {
     const { start, end } = parseTimeRange('now', 'now', now);
@@ -93,9 +93,9 @@ describe('parseTimeRange', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// formatDuration
-// ---------------------------------------------------------------------------
+
+
+
 
 describe('formatDuration', () => {
   it('should format seconds', () => {
@@ -131,9 +131,9 @@ describe('formatDuration', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// calculateInterval
-// ---------------------------------------------------------------------------
+
+
+
 
 describe('calculateInterval', () => {
   it('should return 30s for ranges under 1 hour', () => {
@@ -161,9 +161,9 @@ describe('calculateInterval', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// extractRawData
-// ---------------------------------------------------------------------------
+
+
+
 
 describe('extractRawData', () => {
   it('should return undefined for timeseries panels', () => {
@@ -227,9 +227,9 @@ describe('extractRawData', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// GrafanaClient construction
-// ---------------------------------------------------------------------------
+
+
+
 
 describe('GrafanaClient', () => {
   beforeEach(() => {
@@ -244,9 +244,9 @@ describe('GrafanaClient', () => {
   it('should throw when Grafana is not configured', () => {
     resetGrafanaConfig();
     configureGrafana({ grafanaUrl: '', grafanaToken: '' });
-    // Even with empty strings, isGrafanaConfigured may return true due to
-    // fallback detection. We test the constructor path indirectly.
-    // The real failure case is when the URL is totally missing from env.
+    
+    
+    
     expect(typeof GrafanaClient).toBe('function');
   });
 
@@ -269,9 +269,9 @@ describe('GrafanaClient', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// GrafanaClient API methods (mocked fetch)
-// ---------------------------------------------------------------------------
+
+
+
 
 describe('GrafanaClient API methods', () => {
   beforeEach(() => {
@@ -407,9 +407,9 @@ describe('GrafanaClient API methods', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Retry logic
-// ---------------------------------------------------------------------------
+
+
+
 
 describe('GrafanaClient retry logic', () => {
   beforeEach(() => {
@@ -457,7 +457,7 @@ describe('GrafanaClient retry logic', () => {
 
     const client = new GrafanaClient();
     const result = await client.healthCheck();
-    // healthCheck catches errors and returns ok: false
+    
     expect(result.ok).toBe(false);
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });

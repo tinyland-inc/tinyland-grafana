@@ -1,11 +1,11 @@
-/**
- * Tests for dashboard JSON definitions.
- *
- * Validates that each dashboard JSON is structurally valid and contains
- * expected metadata (uid, title, panels, tags).
- *
- * @module tests/dashboards
- */
+
+
+
+
+
+
+
+
 
 import { describe, it, expect } from 'vitest';
 import {
@@ -15,9 +15,9 @@ import {
   trpcPerformanceDashboard,
 } from '../src/index.js';
 
-// ---------------------------------------------------------------------------
-// Helper to validate common dashboard structure
-// ---------------------------------------------------------------------------
+
+
+
 
 function expectValidDashboard(
   dashboard: Record<string, unknown>,
@@ -28,23 +28,23 @@ function expectValidDashboard(
   expect(dashboard).toBeDefined();
   expect(typeof dashboard).toBe('object');
 
-  // UID and title
+  
   expect(dashboard.uid).toBe(expectedUid);
   expect(dashboard.title).toBe(expectedTitle);
 
-  // Tags
+  
   expect(Array.isArray(dashboard.tags)).toBe(true);
   expect((dashboard.tags as string[]).length).toBeGreaterThan(0);
 
-  // Panels
+  
   expect(Array.isArray(dashboard.panels)).toBe(true);
   expect((dashboard.panels as unknown[]).length).toBeGreaterThanOrEqual(minPanels);
 
-  // Schema version
+  
   expect(typeof dashboard.schemaVersion).toBe('number');
   expect(dashboard.schemaVersion).toBeGreaterThanOrEqual(38);
 
-  // Time range
+  
   expect(dashboard.time).toBeDefined();
   const time = dashboard.time as Record<string, string>;
   expect(time.from).toBeDefined();
@@ -65,9 +65,9 @@ function expectValidPanel(panel: Record<string, unknown>) {
   expect(typeof gridPos.y).toBe('number');
 }
 
-// ---------------------------------------------------------------------------
-// A11y Monitoring Dashboard
-// ---------------------------------------------------------------------------
+
+
+
 
 describe('a11y-monitoring dashboard', () => {
   it('should have valid structure', () => {
@@ -111,9 +111,9 @@ describe('a11y-monitoring dashboard', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Security Monitoring Dashboard
-// ---------------------------------------------------------------------------
+
+
+
 
 describe('security-monitoring dashboard', () => {
   it('should have valid structure', () => {
@@ -150,9 +150,9 @@ describe('security-monitoring dashboard', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Service Topology Dashboard
-// ---------------------------------------------------------------------------
+
+
+
 
 describe('service-topology dashboard', () => {
   it('should have valid structure', () => {
@@ -184,9 +184,9 @@ describe('service-topology dashboard', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// tRPC Performance Dashboard
-// ---------------------------------------------------------------------------
+
+
+
 
 describe('trpc-performance dashboard', () => {
   it('should have valid structure', () => {
@@ -224,9 +224,9 @@ describe('trpc-performance dashboard', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Cross-dashboard checks
-// ---------------------------------------------------------------------------
+
+
+
 
 describe('cross-dashboard validation', () => {
   it('all dashboards should have unique UIDs', () => {

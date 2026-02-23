@@ -1,8 +1,8 @@
-/**
- * Tests for the Grafana configuration module.
- *
- * @module tests/grafana-config
- */
+
+
+
+
+
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import {
@@ -114,16 +114,16 @@ describe('isGrafanaConfigured', () => {
   });
 
   it('should return true when basic auth is provided (defaults)', () => {
-    // Default basic auth is admin/admin which evaluates as truthy
+    
     configureGrafana({ grafanaUrl: 'http://grafana:3000' });
     expect(isGrafanaConfigured()).toBe(true);
   });
 
   it('should return false when baseUrl is empty and no env detection matches', () => {
     configureGrafana({ grafanaUrl: '' });
-    // baseUrl will fall through to auto-detection, which still returns a URL
-    // So this will still be true because auto-detect always returns something
-    // We just verify the function runs without error
+    
+    
+    
     expect(typeof isGrafanaConfigured()).toBe('boolean');
   });
 });
