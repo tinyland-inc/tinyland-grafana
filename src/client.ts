@@ -1,15 +1,15 @@
-/**
- * Grafana HTTP Client Service
- *
- * Implements high-performance HTTP client for Grafana API with:
- * - Service Account Token authentication
- * - Retry logic with exponential backoff
- * - Request/response logging with fingerprint correlation
- * - Connection pooling and rate limiting
- * - Environment-agnostic (Podman Compose + Kubernetes)
- *
- * @module client
- */
+
+
+
+
+
+
+
+
+
+
+
+
 
 import { getLogger } from './config.js';
 import {
@@ -18,13 +18,13 @@ import {
   type TimeRange,
 } from './grafana-config.js';
 
-// ---------------------------------------------------------------------------
-// Public types
-// ---------------------------------------------------------------------------
 
-/**
- * Grafana dashboard metadata
- */
+
+
+
+
+
+
 export interface GrafanaDashboard {
   uid: string;
   title: string;
@@ -34,9 +34,9 @@ export interface GrafanaDashboard {
   folderTitle?: string;
 }
 
-/**
- * Grafana panel query result
- */
+
+
+
 export interface GrafanaPanelData {
   panelId: number;
   title: string;
@@ -57,9 +57,9 @@ export interface GrafanaPanelData {
   }>;
 }
 
-/**
- * Grafana data source info
- */
+
+
+
 export interface GrafanaDataSource {
   id: number;
   uid: string;
@@ -69,22 +69,22 @@ export interface GrafanaDataSource {
   isDefault: boolean;
 }
 
-/**
- * Request context for logging
- */
+
+
+
 export interface RequestContext {
   fingerprintId?: string | null;
   sessionId?: string | null;
   userId?: string | null;
 }
 
-// ---------------------------------------------------------------------------
-// Rate limiter
-// ---------------------------------------------------------------------------
 
-/**
- * Rate limiter using token bucket algorithm
- */
+
+
+
+
+
+
 class RateLimiter {
   private tokens: number;
   private lastRefill: number;
@@ -123,25 +123,25 @@ class RateLimiter {
     this.lastRefill = now;
   }
 
-  /** Expose current token count for testing */
+  
   getTokenCount(): number {
     this.refill();
     return this.tokens;
   }
 }
 
-// ---------------------------------------------------------------------------
-// Time-range helpers  (exported for testing)
-// ---------------------------------------------------------------------------
 
-/**
- * Parse Grafana time range to Unix timestamps (milliseconds).
- *
- * Supports:
- *  - Relative: "now-1h", "now-6h", "now-24h", "now-7d", "now-30d"
- *  - Absolute: ISO 8601 timestamps
- *  - "now" keyword
- */
+
+
+
+
+
+
+
+
+
+
+
 export function parseTimeRange(from: string, to: string, now: number): { start: number; end: number } {
   const logger = getLogger();
 
@@ -180,9 +180,9 @@ export function parseTimeRange(from: string, to: string, now: number): { start: 
   };
 }
 
-/**
- * Format duration in seconds to Loki duration string.
- */
+
+
+
 export function formatDuration(seconds: number): string {
   if (seconds < 60) {
     return `${seconds}s`;
@@ -195,9 +195,9 @@ export function formatDuration(seconds: number): string {
   }
 }
 
-/**
- * Calculate optimal interval based on time range.
- */
+
+
+
 export function calculateInterval(rangeSeconds: number): string {
   if (rangeSeconds < 3600) {
     return '30s';
@@ -212,9 +212,9 @@ export function calculateInterval(rangeSeconds: number): string {
   }
 }
 
-/**
- * Extract raw data from Loki response for table/stat panels.
- */
+
+
+
 export function extractRawData(
   lokiData: { data?: { result?: Array<{ stream?: Record<string, unknown>; values?: Array<[string, string]> }> } },
   panelType: string,
@@ -252,13 +252,13 @@ export function extractRawData(
   return rawEntries;
 }
 
-// ---------------------------------------------------------------------------
-// GrafanaClient
-// ---------------------------------------------------------------------------
 
-/**
- * Grafana HTTP client with retry logic and rate limiting.
- */
+
+
+
+
+
+
 export class GrafanaClient {
   private readonly baseUrl: string;
   private readonly token: string | null;
@@ -305,9 +305,9 @@ export class GrafanaClient {
     });
   }
 
-  // -----------------------------------------------------------------------
-  // Core HTTP request with retry
-  // -----------------------------------------------------------------------
+  
+  
+  
 
   private async request<T>(
     endpoint: string,
@@ -444,13 +444,13 @@ export class GrafanaClient {
     return Math.min(delay, this.retryConfig.maxDelay);
   }
 
-  // -----------------------------------------------------------------------
-  // Public API
-  // -----------------------------------------------------------------------
+  
+  
+  
 
-  /**
-   * Get dashboard by UID
-   */
+  
+
+
   async getDashboard(uid: string, context?: RequestContext): Promise<GrafanaDashboard> {
     const logger = getLogger();
     logger.info('Fetching Grafana dashboard', {
@@ -474,12 +474,12 @@ export class GrafanaClient {
     };
   }
 
-  /**
-   * Query panel data for a specific time range (LOKI-DIRECT).
-   *
-   * Extracts the LogQL query from a Grafana dashboard panel definition,
-   * queries Loki directly, and transforms the response to Chart.js format.
-   */
+  
+
+
+
+
+
   async queryPanel(
     dashboardUid: string,
     panelId: number,
@@ -638,9 +638,9 @@ export class GrafanaClient {
     };
   }
 
-  /**
-   * Get all data sources
-   */
+  
+
+
   async getDatasources(context?: RequestContext): Promise<GrafanaDataSource[]> {
     const logger = getLogger();
     logger.info('Fetching Grafana data sources', {
@@ -669,9 +669,9 @@ export class GrafanaClient {
     }));
   }
 
-  /**
-   * Search dashboards
-   */
+  
+
+
   async searchDashboards(
     query?: string,
     tags?: string[],
@@ -713,9 +713,9 @@ export class GrafanaClient {
     }));
   }
 
-  /**
-   * Health check - verify Grafana is accessible
-   */
+  
+
+
   async healthCheck(context?: RequestContext): Promise<{ ok: boolean; version: string }> {
     const logger = getLogger();
     logger.debug('Grafana health check', {
@@ -739,16 +739,16 @@ export class GrafanaClient {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Geographic city breakdown
-// ---------------------------------------------------------------------------
 
-/**
- * Get geographic city breakdown with fingerprint deduplication.
- *
- * Queries Loki for fingerprint enrichment logs, deduplicates by fingerprint_id
- * per city, and returns the top N cities by unique visitor count.
- */
+
+
+
+
+
+
+
+
+
 export async function getGeographicCityBreakdown(
   timeRange: TimeRange,
   topN: number = 10,
@@ -860,15 +860,15 @@ export async function getGeographicCityBreakdown(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Singleton
-// ---------------------------------------------------------------------------
+
+
+
 
 let grafanaClient: GrafanaClient | null = null;
 
-/**
- * Get or create the Grafana client singleton.
- */
+
+
+
 export function getGrafanaClient(): GrafanaClient {
   if (!grafanaClient) {
     grafanaClient = new GrafanaClient();
@@ -876,9 +876,9 @@ export function getGrafanaClient(): GrafanaClient {
   return grafanaClient;
 }
 
-/**
- * Reset the singleton (useful in tests).
- */
+
+
+
 export function resetGrafanaClient(): void {
   grafanaClient = null;
 }

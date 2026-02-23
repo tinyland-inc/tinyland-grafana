@@ -1,15 +1,15 @@
-/**
- * @tummycrypt/tinyland-grafana
- *
- * Grafana API client, configuration, and dashboard definitions
- * for Tinyland observability.
- *
- * @module @tummycrypt/tinyland-grafana
- */
 
-// ---------------------------------------------------------------------------
-// Package-level configuration
-// ---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
 export {
   configureGrafana,
   getGrafanaConfig,
@@ -23,9 +23,9 @@ export type {
   GrafanaLogger,
 } from './config.js';
 
-// ---------------------------------------------------------------------------
-// Grafana configuration (environment detection, validation, OAuth helpers)
-// ---------------------------------------------------------------------------
+
+
+
 export {
   grafanaConfig,
   buildGrafanaConfig,
@@ -40,15 +40,15 @@ export type {
   PanelReference,
 } from './grafana-config.js';
 
-// ---------------------------------------------------------------------------
-// Grafana HTTP client
-// ---------------------------------------------------------------------------
+
+
+
 export {
   GrafanaClient,
   getGrafanaClient,
   resetGrafanaClient,
   getGeographicCityBreakdown,
-  // Time-range helpers (useful for consumers and testing)
+  
   parseTimeRange,
   formatDuration,
   calculateInterval,
@@ -62,9 +62,9 @@ export type {
   RequestContext,
 } from './client.js';
 
-// ---------------------------------------------------------------------------
-// Dashboard JSON definitions
-// ---------------------------------------------------------------------------
+
+
+
 import _a11yMonitoringDashboard from './dashboards/a11y-monitoring.json';
 import _securityMonitoringDashboard from './dashboards/security-monitoring.json';
 import _serviceTopologyDashboard from './dashboards/service-topology.json';
