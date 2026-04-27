@@ -1,6 +1,6 @@
 {
   "name": "@tummycrypt/tinyland-grafana",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Grafana API client, configuration, and dashboard definitions for Tinyland observability",
   "type": "module",
   "license": "(Zlib AND LicenseRef-Tinyland-Proprietary)",
@@ -21,10 +21,11 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "pnpm build && pnpm check:package",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:package": "publint"
   },
   "keywords": [
     "grafana",
@@ -35,17 +36,17 @@
   "author": "Tinyland Inc.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tinyland-inc/tinyland.dev",
-    "directory": "packages/tinyland-grafana"
+    "url": "git+https://github.com/tinyland-inc/tinyland-grafana.git"
   },
   "dependencies": {},
   "devDependencies": {
     "@types/node": "^24.6.0",
     "typescript": "^5.5.0",
-    "vitest": "^3.0.0"
+    "vitest": "^4.0.0",
+    "publint": "^0.3.18"
   },
   "peerDependencies": {
-    "@tummycrypt/tinyland-otel": "workspace:*"
+    "@tummycrypt/tinyland-otel": "^0.2.2"
   },
   "peerDependenciesMeta": {
     "@tummycrypt/tinyland-otel": {
@@ -57,7 +58,11 @@
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
-    "access": "public",
-    "provenance": true
+    "access": "public"
+  },
+  "packageManager": "pnpm@10.13.1",
+  "homepage": "https://github.com/tinyland-inc/tinyland-grafana",
+  "bugs": {
+    "url": "https://github.com/tinyland-inc/tinyland-grafana/issues"
   }
 }
