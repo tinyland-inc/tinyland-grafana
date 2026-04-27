@@ -36,7 +36,10 @@ filegroup(
 ts_project(
     name = "tinyland_grafana",
     srcs = glob(
-        ["src/**/*.ts"],
+        [
+            "src/**/*.ts",
+            "src/**/*.json",
+        ],
         exclude = [
             "src/**/*.test.ts",
             "src/**/*.spec.ts",
@@ -104,7 +107,10 @@ vitest_bin.vitest_test(
 
 ts_project(
     name = "typecheck",
-    srcs = glob(["src/**/*.ts"]) + ["package.json"],
+    srcs = glob([
+        "src/**/*.ts",
+        "src/**/*.json",
+    ]) + ["package.json"],
     data = [":dashboards"],
     declaration = False,
     no_emit = True,
