@@ -3,7 +3,6 @@ BUILD.bazel for @tummycrypt/tinyland-grafana.
 
 Dual-mode build: works with both pnpm (standalone) and Bazel (CI/production).
   Standalone: cd packages/tinyland-grafana && pnpm test
-  Monorepo:   bazel build //packages/tinyland-grafana/...
 
 Provides Grafana API client, configuration, and dashboard JSON definitions.
 """
