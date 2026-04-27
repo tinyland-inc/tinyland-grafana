@@ -73,7 +73,7 @@ npm_package(
         ":dashboards",
     ],
     package = "@tummycrypt/tinyland-grafana",
-    version = "0.2.2",
+    version = "0.2.3",
     visibility = ["//visibility:public"],
 )
 
