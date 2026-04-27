@@ -129,8 +129,17 @@ describe('isGrafanaConfigured', () => {
 });
 
 describe('validateGrafanaConfig', () => {
+  const originalEnv = { ...process.env };
+
   beforeEach(() => {
+    process.env = { ...originalEnv };
+    delete process.env.KUBERNETES_SERVICE_HOST;
+    delete process.env.GRAFANA_SERVICE_ACCOUNT_TOKEN;
     resetGrafanaConfig();
+  });
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
   });
 
   it('should report errors when no token is set', () => {
