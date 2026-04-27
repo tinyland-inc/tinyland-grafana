@@ -46,7 +46,7 @@ ts_project(
     data = [":dashboards"],
     declaration = True,
     declaration_map = True,
-    source_map = True,
+    source_map = False,
     tsconfig = ":tsconfig.json",
     transpiler = "tsc",
     out_dir = "dist",
