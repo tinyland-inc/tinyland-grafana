@@ -7,7 +7,7 @@ Dual-mode build: works with both pnpm (standalone) and Bazel (CI/production).
 Provides Grafana API client, configuration, and dashboard JSON definitions.
 """
 
-load("@aspect_rules_js//npm:defs.bzl", "npm_package")
+load("@aspect_rules_js//npm:defs.bzl", "npm_link_package", "npm_package")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@tummycrypt_tinyland_grafana_npm//:defs.bzl", "npm_link_all_packages")
 load("@tummycrypt_tinyland_grafana_npm//:vitest/package_json.bzl", vitest_bin = "bin")
@@ -17,6 +17,12 @@ load("@tummycrypt_tinyland_grafana_npm//:vitest/package_json.bzl", vitest_bin = 
 # =============================================================================
 
 npm_link_all_packages(name = "node_modules")
+
+# First-party dep resolved via the Bazel module graph (not npm).
+npm_link_package(
+    name = "node_modules/@tummycrypt/tinyland-otel",
+    src = "@tummycrypt_tinyland_otel//:pkg",
+)
 
 
 # =============================================================================
@@ -56,6 +62,7 @@ ts_project(
     validate = False,
     deps = [
         ":node_modules",
+        ":node_modules/@tummycrypt/tinyland-otel",
         ":node_modules/@types/node",
     ],
     visibility = ["//visibility:public"],
@@ -84,9 +91,10 @@ npm_package(
 vitest_bin.vitest_test(
     name = "test",
     data = [
-        
+
                 ":dashboards",
         ":node_modules",
+        ":node_modules/@tummycrypt/tinyland-otel",
         "tsconfig.json",
         ":node_modules/vitest",
         "vitest.config.ts",
@@ -119,6 +127,7 @@ ts_project(
     validate = False,
     deps = [
         ":node_modules",
+        ":node_modules/@tummycrypt/tinyland-otel",
         ":node_modules/@types/node",
     ],
     visibility = ["//visibility:public"],
