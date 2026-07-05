@@ -1,6 +1,6 @@
 {
   "name": "@tummycrypt/tinyland-grafana",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Grafana API client, configuration, and dashboard definitions for Tinyland observability",
   "type": "module",
   "license": "(Zlib AND LicenseRef-Tinyland-Proprietary)",
