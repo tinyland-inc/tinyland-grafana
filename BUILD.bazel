@@ -7,6 +7,7 @@ Dual-mode build: works with both pnpm (standalone) and Bazel (CI/production).
 Provides Grafana API client, configuration, and dashboard JSON definitions.
 """
 
+load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
 load("@aspect_rules_js//npm:defs.bzl", "npm_link_package", "npm_package")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@tummycrypt_tinyland_grafana_npm//:defs.bzl", "npm_link_all_packages")
@@ -57,13 +58,40 @@ ts_project(
     source_map = False,
     tsconfig = ":tsconfig.json",
     transpiler = "tsc",
-    out_dir = "dist",
+    # Emit JS to an intermediate dir so it doesn't collide with the assembled
+    # ":dist" TreeArtifact below. `--outDir dist_ts` is passed to tsc, overriding
+    # the tsconfig `outDir`; validate=False disables the consistency check.
+    out_dir = "dist_ts",
     root_dir = "src",
     validate = False,
     deps = [
         ":node_modules",
         ":node_modules/@tummycrypt/tinyland-otel",
         ":node_modules/@types/node",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# =============================================================================
+# Assembled dist/ TreeArtifact
+# =============================================================================
+#
+# tsc (resolveJsonModule) leaves `import ... from './dashboards/*.json'` in the
+# emitted dist/index.js but never copies the .json into out_dir, and the
+# ":dashboards" filegroup keeps them at their src/ path. Merge the ts_project JS
+# output (dist_ts/*.js) with the dashboard JSON (src/dashboards/*.json) into a
+# single dist/ tree so dist/index.js and dist/dashboards/*.json ship together.
+# root_paths strips the "dist_ts" and "src" package-relative prefixes so JS lands
+# at dist/<file>.js and JSON nests at dist/dashboards/<file>.json.
+copy_to_directory(
+    name = "dist",
+    srcs = [
+        ":dashboards",
+        ":tinyland_grafana",
+    ],
+    root_paths = [
+        "dist_ts",
+        "src",
     ],
     visibility = ["//visibility:public"],
 )
@@ -76,11 +104,10 @@ npm_package(
     name = "pkg",
     srcs = [
         "package.json",
-        ":tinyland_grafana",
-        ":dashboards",
+        ":dist",
     ],
     package = "@tummycrypt/tinyland-grafana",
-    version = "0.2.3",
+    version = "0.2.4",
     visibility = ["//visibility:public"],
 )
 
