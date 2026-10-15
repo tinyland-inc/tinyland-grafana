@@ -2,13 +2,13 @@
 BUILD.bazel for @tummycrypt/tinyland-grafana.
 
 Dual-mode build: works with both pnpm (standalone) and Bazel (CI/production).
-  Standalone: cd packages/tinyland-grafana && pnpm test
+  Standalone: pnpm install && pnpm test
 
 Provides Grafana API client, configuration, and dashboard JSON definitions.
 """
 
 load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
-load("@aspect_rules_js//npm:defs.bzl", "npm_link_package", "npm_package")
+load("@aspect_rules_js//npm:defs.bzl", "npm_package")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@tummycrypt_tinyland_grafana_npm//:defs.bzl", "npm_link_all_packages")
 load("@tummycrypt_tinyland_grafana_npm//:vitest/package_json.bzl", vitest_bin = "bin")
@@ -19,12 +19,8 @@ load("@tummycrypt_tinyland_grafana_npm//:vitest/package_json.bzl", vitest_bin = 
 
 npm_link_all_packages(name = "node_modules")
 
-# First-party dep resolved via the Bazel module graph (not npm).
-npm_link_package(
-    name = "node_modules/@tummycrypt/tinyland-otel",
-    src = "@tummycrypt_tinyland_otel//:pkg",
-)
-
+# No first-party deps: the unused tinyland-otel link was dropped in 1.0.0
+# (see MODULE.bazel).
 
 # =============================================================================
 # Dashboard JSON data files
@@ -66,7 +62,6 @@ ts_project(
     validate = False,
     deps = [
         ":node_modules",
-        ":node_modules/@tummycrypt/tinyland-otel",
         ":node_modules/@types/node",
     ],
     visibility = ["//visibility:public"],
@@ -88,6 +83,10 @@ copy_to_directory(
     srcs = [
         ":dashboards",
         ":tinyland_grafana",
+        # The .d.ts files live in the ts_project "types" output group, which
+        # the DefaultInfo above does not carry. 0.2.x shipped //:pkg without
+        # declarations even though package.json "types" points at them.
+        ":tinyland_grafana_types",
     ],
     root_paths = [
         "dist_ts",
@@ -107,7 +106,7 @@ npm_package(
         ":dist",
     ],
     package = "@tummycrypt/tinyland-grafana",
-    version = "0.2.4",
+    version = "1.0.0",
     visibility = ["//visibility:public"],
 )
 
@@ -118,10 +117,8 @@ npm_package(
 vitest_bin.vitest_test(
     name = "test",
     data = [
-
-                ":dashboards",
+        ":dashboards",
         ":node_modules",
-        ":node_modules/@tummycrypt/tinyland-otel",
         "tsconfig.json",
         ":node_modules/vitest",
         "vitest.config.ts",
@@ -137,7 +134,7 @@ vitest_bin.vitest_test(
 )
 
 # =============================================================================
-# Typecheck-only target (no emit)
+# Typecheck-only target (tsc 7.0.2, no emit)
 # =============================================================================
 
 ts_project(
@@ -154,7 +151,6 @@ ts_project(
     validate = False,
     deps = [
         ":node_modules",
-        ":node_modules/@tummycrypt/tinyland-otel",
         ":node_modules/@types/node",
     ],
     visibility = ["//visibility:public"],

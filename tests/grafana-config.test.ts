@@ -17,12 +17,20 @@ import {
   extractOAuthUserInfo,
 } from '../src/grafana-config.js';
 
-describe('detectEnvironment', () => {
-  const originalEnv = { ...process.env };
+const originalEnv = { ...process.env };
 
-  afterEach(() => {
-    process.env = { ...originalEnv };
-  });
+function resetEnvToOriginal() {
+  process.env = { ...originalEnv };
+}
+
+function resetEnvForNonKubernetesValidation() {
+  resetEnvToOriginal();
+  delete process.env.KUBERNETES_SERVICE_HOST;
+  delete process.env.GRAFANA_SERVICE_ACCOUNT_TOKEN;
+}
+
+describe('detectEnvironment', () => {
+  afterEach(resetEnvToOriginal);
 
   it('should return "kubernetes" when KUBERNETES_SERVICE_HOST is set', () => {
     process.env.KUBERNETES_SERVICE_HOST = '10.0.0.1';
@@ -129,17 +137,14 @@ describe('isGrafanaConfigured', () => {
 });
 
 describe('validateGrafanaConfig', () => {
-  const originalEnv = { ...process.env };
-
   beforeEach(() => {
-    process.env = { ...originalEnv };
-    delete process.env.KUBERNETES_SERVICE_HOST;
-    delete process.env.GRAFANA_SERVICE_ACCOUNT_TOKEN;
     resetGrafanaConfig();
+    resetEnvForNonKubernetesValidation();
   });
 
   afterEach(() => {
-    process.env = { ...originalEnv };
+    resetGrafanaConfig();
+    resetEnvToOriginal();
   });
 
   it('should report errors when no token is set', () => {
@@ -156,17 +161,8 @@ describe('validateGrafanaConfig', () => {
   });
 
   it('should throw in kubernetes environment when validation fails', () => {
-    const origK8s = process.env.KUBERNETES_SERVICE_HOST;
     process.env.KUBERNETES_SERVICE_HOST = '10.0.0.1';
-    try {
-      expect(() => validateGrafanaConfig()).toThrow('Grafana configuration invalid');
-    } finally {
-      if (origK8s === undefined) {
-        delete process.env.KUBERNETES_SERVICE_HOST;
-      } else {
-        process.env.KUBERNETES_SERVICE_HOST = origK8s;
-      }
-    }
+    expect(() => validateGrafanaConfig()).toThrow('Grafana configuration invalid');
   });
 });
 
