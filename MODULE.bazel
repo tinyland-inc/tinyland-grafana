@@ -1,21 +1,25 @@
 module(
     name = "tummycrypt_tinyland_grafana",
-    version = "0.2.4",
+    version = "1.0.0",
     compatibility_level = 1,
 )
 
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
 bazel_dep(name = "aspect_rules_js", version = "2.9.1")
-bazel_dep(name = "aspect_rules_ts", version = "3.8.4")
+bazel_dep(name = "aspect_rules_ts", version = "3.10.1")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_nodejs", version = "6.7.3")
 
-# Inter-module dependencies
-bazel_dep(name = "tummycrypt_tinyland_otel", version = "0.2.3")
+# Inter-module dependencies: none.
+# 0.2.x declared bazel_dep(tummycrypt_tinyland_otel, 0.2.3) and linked
+# @tummycrypt/tinyland-otel into node_modules, but nothing in src/ or tests/
+# imports it and package.json never declared it. The dead edge pulled an old
+# otel into every consumer graph, so 1.0.0 drops it (RU6: in-house code is
+# consumed only through bazel_dep, and only where it is used).
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
-node.toolchain(node_version = "22.13.1")
+node.toolchain(node_version = "22.22.0")
 
 pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
 pnpm.pnpm(
@@ -35,6 +39,8 @@ npm.npm_translate_lock(
 )
 use_repo(npm, "tummycrypt_tinyland_grafana_npm")
 
-rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
-rules_ts_ext.deps(ts_version = "5.9.3")
-use_repo(rules_ts_ext, "npm_typescript")
+# TypeScript 7.0.2 (RU1/RU13), the native compiler. rules_ts >= 3.9 mirrors its
+# platform packages; the version is read from package.json so there is one pin.
+typescript = use_extension("@aspect_rules_ts//ts:extensions.bzl", "typescript")
+typescript.deps(version_from = "//:package.json")
+use_repo(typescript, "npm_typescript")
